@@ -17,6 +17,9 @@ def init_db():
                    name TEXT,
                    last_active TIMESTAMP)
                    """)
+    
+    cursor.execute("""CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT, timestamp TEXT)""")
+
     conn.commit()
     conn.close()
 
@@ -71,6 +74,10 @@ def join():
 
 @app.route("/teacher")
 def teacher():
+    return render_template("teacher.html")
+
+@app.route("/teacher-data")
+def teacher_data():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
 
@@ -79,12 +86,11 @@ def teacher():
 
     conn.close()
 
-    student_status = []
     now = datetime.now()
     result = []
 
-    for s in students:
-        student_id, name, last_active_str = s
+    for student in students:
+        student_id, name, last_active_str = student
         if last_active_str:
             try:
                last_active_time = datetime.strptime(last_active_str, "%Y-%m-%d %H:%M:%S")
@@ -93,7 +99,6 @@ def teacher():
                 status = "INACTIVE"           
         else:
            status = "INACTIVE"
-        student_status.append((student_id, name, last_active_str, status))
 
         result.append({
             "id": student_id,
@@ -101,8 +106,41 @@ def teacher():
             "last_active": last_active_str,
             "status": status
         })
+
     return jsonify(result)
-    return render_template("teacher.html", students=student_status)
+    
+
+@app.route("/broadcast", methods=["POST"])
+def broadcast():
+    message = request.form.get("message")
+    if not message:
+        return redirect("/teacher")
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO messages (content, timestamp) VALUES (?, ?)", (message, current_time)
+    )
+    conn.commit()
+    conn.close()
+
+    return redirect("/teacher")
+
+@app.route("/student-data")
+def students_data():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT content FROM messages ORDER BY id DESC LIMIT 1")
+    message = cursor.fetchone()
+    conn.close()
+
+    if message:
+        return jsonify({"message": message[0]})
+    else:
+        return jsonify({"message": ""})
 
 if __name__ == "__main__":
     init_db()
