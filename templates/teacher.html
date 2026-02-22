@@ -5,13 +5,23 @@
     </head>
     <body>
         <h1>Teacher Dashboard</h1>
+        
+        <h2>Broadcast Message</h2>
+        <form method="POST" action="/broadcast">
+            <input type="text" name="message" 
+            placeholder="Enter message..." required>
+            <button type = "submit">Send</button>
+        </form>
+        
+        <hr>
 
+        <h2>Students</h2>
         <ul id="student-list">
         </ul>
         <script>
             function fetchStudents() {
-                fetch("/teacher")
-                .then(Response => response.json())
+                fetch("/teacher-data")
+                .then(response => response.json())
                 .then(data => {
                     const list = document.getElementById("student-list");
                     list.innerHTML = "";

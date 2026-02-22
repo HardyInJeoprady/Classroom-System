@@ -9,9 +9,23 @@
 <body>
 <div class="card">
     <h1>Welcome {{name}}</h1>
+    <h2 id="message-box"></h2>
     <p>You are marked present</p>
     <p>{{time}}</p>
 </div>
+
+    <script>
+      function fetchMessage() {
+        fetch("/student-data")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("message-box").innerText = data.message;
+        });
+      }
+
+      setInterval(fetchMessage, 2000);
+      fetchMessage();
+    </script>
 </body>
 
 </html>
