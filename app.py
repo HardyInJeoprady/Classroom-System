@@ -2,6 +2,7 @@ import sqlite3
 from flask import Flask, render_template, request, redirect, make_response, session, jsonify
 import uuid
 from datetime import datetime, timedelta
+import hashlib
 
 app = Flask(__name__)
 app.secret_key = "my_secret_key"
@@ -18,7 +19,21 @@ def init_db():
                    last_active TIMESTAMP)
                    """)
     
-    cursor.execute("""CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT, timestamp TEXT)""")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS messages 
+                   (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    content TEXT, timestamp TEXT)""")
+    
+    cursor.execute("""CREATE TABLE IF NOT EXISTS teachers (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   username TEXT UNIQUE,
+                   password TEXT)""")
+    
+    cursor.execute("SELECT * FROM teachers WHERE username = ?", ("admin",))
+    if not cursor.fetchone():
+        hashed_password = hashlib.sha256("admin123".encode()).hexdigest()
+
+        cursor.execute("INSERT INTO teachers (username, password) VALUES (?, ?)", ("admin", hashed_password))
+        
 
     conn.commit()
     conn.close()
@@ -74,10 +89,13 @@ def join():
 
 @app.route("/teacher")
 def teacher():
+    if not session.get("teacher_logged_in"): return redirect("/teacher-login")
     return render_template("teacher.html")
 
 @app.route("/teacher-data")
 def teacher_data():
+    if not session.get("teacher_logged_in"): return jsonify({"error": "Unauthorized"}), 403
+
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
 
@@ -112,6 +130,8 @@ def teacher_data():
 
 @app.route("/broadcast", methods=["POST"])
 def broadcast():
+    if not session.get("teacher_logged_in"): return redirect("/teacher-login")
+
     message = request.form.get("message")
     if not message:
         return redirect("/teacher")
@@ -141,6 +161,35 @@ def students_data():
         return jsonify({"message": message[0]})
     else:
         return jsonify({"message": ""})
+    
+    
+@app.route("/teacher-login", methods =["GET", "POST"])
+def teacher_login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM teachers WHERE username = ? AND password = ?", (username, hashed_password))
+        teacher = cursor.fetchone()
+        conn.close()
+
+        if teacher:
+            session["teacher_logged_in"] = True
+            return redirect("/teacher")
+        else:
+            return "Invalid Credentials"
+    return render_template("teacher_login.html")    
+
+@app.route("/teacher-logout")
+def teacher_logout():
+    session.pop("teacher_logged_out", None)
+    return redirect("/teacher-login")
+
 
 if __name__ == "__main__":
     init_db()
