@@ -30,6 +30,15 @@
         setInterval(fetchMessage, 2000);
         fetchMessage();
     </script>
+    <script src="http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+    <script>
+        const socket = io();
+
+        socket.on("new_message", function(data) {
+            document.getElementById("message-box").innerText = data.message;
+        });
+    </script>
 
 </body>
 </html>

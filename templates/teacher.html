@@ -30,13 +30,20 @@
                         const li = document.createElement("li");
                         li.textContent =  "ID: " + student.id + " | Name: " + student.name + " | Last Active: " + student.last_active + " | Status: " + student.status;
                         list.appendChild(li);
-                    })       
-                })
+                    });       
+                });
             }
-
             fetchStudents();
+            </script>
 
-            setInterval(fetchStudents, 2000);
-        </script>
+            <script src = "http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+           <script>
+            const socket = io();
+
+            socket.on("updaet_students", function() {
+                fetchStudents();
+            });
+            </script>
     </body>
 </html>

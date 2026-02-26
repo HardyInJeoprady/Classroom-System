@@ -3,9 +3,11 @@ from flask import Flask, render_template, request, redirect, make_response, sess
 import uuid
 from datetime import datetime, timedelta
 import hashlib
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.secret_key = "my_secret_key"
+socketio = SocketIO(app)
 
 def init_db():
     conn = sqlite3.connect("database.db")
@@ -78,6 +80,8 @@ def join():
     )
     conn.commit()
 
+    socketio.emit("update_students")
+
     student_id = cursor.lastrowid
     session['student_id'] = student_id
     conn.close()
@@ -144,6 +148,9 @@ def broadcast():
         "INSERT INTO messages (content, timestamp) VALUES (?, ?)", (message, current_time)
     )
     conn.commit()
+
+    socketio.emit("new_message", {"message": message})
+
     conn.close()
 
     return redirect("/teacher")
@@ -193,4 +200,4 @@ def teacher_logout():
 
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
