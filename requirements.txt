@@ -1,0 +1,5 @@
+# Web Framework
+flask
+
+# Real-time communication (WebSockets)
+flask-socketio
