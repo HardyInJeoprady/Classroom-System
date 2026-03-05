@@ -19,7 +19,8 @@
         <p>{{time}}</p>
     </div>
 
-    <script>
+    <div id="broadcast-container"></div>
+    <!-- <script>
         function fetchMessage() {
             fetch("/student-data")
             .then(response => response.json())
@@ -38,6 +39,61 @@
         socket.on("new_message", function(data) {
             document.getElementById("message-box").innerText = data.message;
         });
+    </script> -->
+    <!-- <script> -->
+        <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+const socket = io();
+
+socket.on("broadcast", function(data) {
+
+    const container = document.getElementById("broadcast-container");
+    container.innerHTML = "";
+
+    if (data.message) {
+        const text = document.createElement("p");
+        text.innerText = data.message;
+        container.appendChild(text);
+    }
+
+    if (data.file) {
+
+        const url = data.file;
+        const extension = url.split(".").pop().toLowerCase();
+
+        if (["png","jpg","jpeg","gif"].includes(extension)) {
+
+            const img = document.createElement("img");
+            img.src = url;
+            img.style.maxWidth = "500px";
+
+            container.appendChild(img);
+        }
+
+        else if (extension === "pdf") {
+
+            const iframe = document.createElement("iframe");
+            iframe.src = url;
+            iframe.width = "600";
+            iframe.height = "500";
+
+            container.appendChild(iframe);
+        }
+
+        else {
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.innerText = "Download File";
+            link.target = "_blank";
+
+            container.appendChild(link);
+        }
+    }
+
+});
+</script>
     </script>
 
 </body>

@@ -7,9 +7,16 @@
         <h1>Teacher Dashboard</h1>
         
         <h2>Broadcast Message</h2>
-        <form method="POST" action="/broadcast">
+        <form method="POST" action="/broadcast" enctype="multipart/form-data">
             <input type="text" name="message" 
-            placeholder="Enter message..." required>
+            placeholder="Text message">
+
+            <br><br>
+
+            <input type="file" name="file">
+
+            <br><br>
+            
             <button type = "submit">Send</button>
         </form>
         
@@ -39,11 +46,22 @@
             <script src = "http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 
            <script>
-            const socket = io();
+            // const socket = io();
 
-            socket.on("updaet_students", function() {
-                fetchStudents();
-            });
+            // socket.on("updaet_students", function() {
+            //     fetchStudents();
+            socket.on("active_students_update", 
+                function(activeStudents) {
+                    allStudents.forEach(student => {
+                        if
+                        (activeStudents.includes(student.id)) {
+                            document.getElementById("status-" + student.id).innerText = "Active";
+                        } else {
+                            document.getElementById("status-" + student.id).innerText = "Inactive";
+                        }
+                    });
+                }
+            );
             </script>
     </body>
 </html>
