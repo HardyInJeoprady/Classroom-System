@@ -3,3 +3,5 @@ flask
 
 # Real-time communication (WebSockets)
 flask-socketio
+
+eventlet
