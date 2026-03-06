@@ -90,6 +90,23 @@ def join():
     response.set_cookie("student_uuid", student_uuid)
 
     return response
+@app.route("/ping", methods=["POST"])
+def ping():
+    student_uuid = request.cookies.get("student_uuid")
+    print(f"Ping received - UUID: {student_uuid}")  # add this
+    if not student_uuid:
+        return jsonify({"error": "No UUID"}), 400
+
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE students SET last_active = ? WHERE uuid = ?",
+        (current_time, student_uuid)
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "ok"})
 
 @app.route("/teacher")
 def teacher():

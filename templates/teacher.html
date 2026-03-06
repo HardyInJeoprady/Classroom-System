@@ -3,48 +3,152 @@
     <head>
         <title>Teacher Dashboard</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     </head>
-    <body>
-        <h1>Teacher Dashboard</h1>
-        
-        <h2>Broadcast Message</h2>
-        <form method="POST" action="/broadcast">
-            <input type="text" name="message" 
-            placeholder="Enter message..." required>
-            <button type = "submit">Send</button>
-        </form>
-        
-        <hr>
+    <body class="dashboard-page">
 
-        <h2>Students</h2>
-        <ul id="student-list">
-        </ul>
+        <!-- Top navbar -->
+        <nav class="dash-nav">
+            <div class="dash-nav-brand">
+                <i class='bx bxs-graduation'></i>
+                <span>ClassControl</span>
+            </div>
+            <div class="dash-nav-title">Teacher Dashboard</div>
+            <div class="dash-nav-status">
+                <span class="status-dot"></span> Live
+            </div>
+        </nav>
+
+        <div class="dash-container">
+
+            <!-- Broadcast section -->
+            <section class="dash-card broadcast-card">
+                <div class="dash-card-header">
+                    <i class='bx bx-broadcast'></i>
+                    <h2>Broadcast Message</h2>
+                </div>
+                <form method="POST" action="/broadcast" class="broadcast-form">
+                    <div class="broadcast-input-wrap">
+                        <input type="text" name="message"
+                               placeholder="Type a message to all students..."
+                               required autocomplete="off">
+                        <button type="submit">
+                            <i class='bx bx-send'></i> Send
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Students section -->
+            <section class="dash-card students-card">
+                <div class="dash-card-header">
+                    <i class='bx bx-group'></i>
+                    <h2>Students</h2>
+                    <span class="student-count" id="count-active">0 active</span><span class="student-count count-inactive" id="count-inactive">0 inactive</span><span class="student-count count-total" id="count-total">0 total</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="student-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Last Active</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-list"></tbody>
+                    </table>
+                    <div class="empty-state" id="empty-state">
+                        <i class='bx bx-user-x'></i>
+                        <p>No students connected yet</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Heartbeat SVG template (active) -->
+        <template id="heartbeat-active">
+            <div class="heartbeat-wrap active">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5184 3844.17" class="heartbeat-svg">
+                    <path class="path-pulse" d="M472.68,2183.89h678.94c3.36,0,6.34-2.87,7.41-7.14l40.53-160.91c2.68-10.61,14.23-8.97,15.19,2.16l30.25,352.19c.99,11.57,13.2,12.68,15.35,1.4l51.88-272.25c1.69-8.83,10.4-10.78,14.13-3.15l40.54,82.96c1.45,2.95,3.91,4.74,6.55,4.74h92.41c3.66,0,6.83-3.41,7.63-8.19l76.04-452.87c1.97-11.69,14.66-10.54,15.43,1.39l53.31,824.56c.79,12.22,13.9,13.01,15.49,.93l66.68-504.25c1.55-11.69,14.13-11.48,15.44,.27l14.52,129.22c.58,5.13,3.87,8.93,7.74,8.93h513.59c3.32,0,6.29-2.81,7.39-7l45.1-171.76c2.66-10.09,13.55-9.01,15.07,1.49l51.17,354.1c1.62,11.17,13.47,11.39,15.32,.29l49.66-298.57c1.71-10.3,12.41-11.15,15.02-1.19l30.26,115.63c1.1,4.2,4.06,7.02,7.39,7.02h125.72c3.82,0,7.07-3.7,7.71-8.75l45.45-361.07c1.51-11.95,14.4-11.53,15.48,.5l58.23,649.83c1.04,11.64,13.38,12.56,15.38,1.14l83.84-478.87c1.95-11.17,13.94-10.63,15.33,.69l35.02,283.79c1.23,9.97,11.25,12.07,14.68,3.06l32.28-84.6c1.34-3.51,4.03-5.71,6.97-5.71h425.48c3.55,0,6.65-3.21,7.56-7.81l29.65-150.4c2.09-10.62,13.42-10.33,15.2,.4l65.6,394.9c1.81,10.86,13.32,10.99,15.25,.16l72.68-407.51c1.94-10.92,13.61-10.65,15.27,.35l40.26,266.12c1.6,10.56,12.61,11.41,15.11,1.16l21.96-90.15c1.05-4.32,4.05-7.24,7.44-7.24h133.92c3.78,0,7.01-3.61,7.7-8.59l58.47-424.26c1.66-11.99,14.66-11.19,15.49,.95l51.88,760.5c.82,11.97,13.57,12.99,15.44,1.23l78.72-493.98c1.74-10.95,13.34-11.12,15.26-.23l27.61,156.3c.84,4.73,3.99,8.08,7.61,8.08h550.56"
+                        style="fill:none; stroke-linecap:round; stroke-linejoin:round; stroke-width:29px;"/>
+                </svg>
+            </div>
+        </template>
+
+        <!-- Flatline SVG template (inactive) -->
+        <template id="heartbeat-inactive">
+            <div class="heartbeat-wrap inactive">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5184 3844.17" class="heartbeat-svg">
+                    <line class="path-flat"
+                          x1="472" y1="2183.89"
+                          x2="4713" y2="2183.89"
+                          style="fill:none; stroke-linecap:round; stroke-width:29px;"/>
+                </svg>
+            </div>
+        </template>
+
         <script>
             function fetchStudents() {
                 fetch("/teacher-data")
                 .then(response => response.json())
                 .then(data => {
-                    const list = document.getElementById("student-list");
-                    list.innerHTML = "";
+                    const tbody = document.getElementById("student-list");
+                    const empty = document.getElementById("empty-state");
+                    const countActive   = document.getElementById("count-active");
+                    const countInactive = document.getElementById("count-inactive");
+                    const countTotal    = document.getElementById("count-total");
+                    tbody.innerHTML = "";
 
-                    data.forEach(student => {
-                        const li = document.createElement("li");
-                        li.textContent =  "ID: " + student.id + " | Name: " + student.name + " | Last Active: " + student.last_active + " | Status: " + student.status;
-                        list.appendChild(li);
-                    });       
+                    if (data.length === 0) {
+                        empty.style.display = "flex";
+                        countActive.textContent   = "0 active";
+                        countInactive.textContent = "0 inactive";
+                        countTotal.textContent    = "0 total";
+                    } else {
+                        empty.style.display = "none";
+
+                        const activeCount   = data.filter(s => s.status.toUpperCase() === "ACTIVE").length;
+                        const inactiveCount = data.length - activeCount;
+
+                        countActive.textContent   = activeCount + " active";
+                        countInactive.textContent = inactiveCount + " inactive";
+                        countTotal.textContent    = data.length + " total";
+
+                        data.forEach((student, i) => {
+                            const tr = document.createElement("tr");
+                            tr.style.animationDelay = (i * 0.05) + "s";
+                            tr.classList.add("row-animate");
+
+                            const isActive = student.status.toUpperCase() === "ACTIVE";
+                            const tmplId = isActive ? "heartbeat-active" : "heartbeat-inactive";
+                            const tmpl = document.getElementById(tmplId);
+                            const heartbeatNode = tmpl.content.cloneNode(true);
+
+                            const tdStatus = document.createElement("td");
+                            tdStatus.appendChild(heartbeatNode);
+
+                            tr.innerHTML = `
+                                <td><span class="id-badge">#${student.id}</span></td>
+                                <td><span class="student-name">${student.name}</span></td>
+                                <td><span class="time-label">${student.last_active}</span></td>
+                            `;
+                            tr.appendChild(tdStatus);
+                            tbody.appendChild(tr);
+                        });
+                    }
                 });
             }
             fetchStudents();
-            </script>
-
-            <script src = "http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-
-           <script>
+            setInterval(fetchStudents, 5000);
+        </script>
+        <script src="http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+        <script>
             const socket = io();
-
-            socket.on("updaet_students", function() {
+            socket.on("update_students", function() {
                 fetchStudents();
             });
-            </script>
+        </script>
     </body>
 </html>

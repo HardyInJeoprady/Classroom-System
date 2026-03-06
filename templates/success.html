@@ -39,6 +39,14 @@
             document.getElementById("message-box").innerText = data.message;
         });
     </script>
+    <script>
+        // Ping every 5 seconds to stay active
+        function pingServer() {
+            fetch("/ping", { method: "POST" })
+        }
+        pingServer(); // ping immediately on load
+        setInterval(pingServer, 5000);
+    </script>
 
 </body>
 </html>
