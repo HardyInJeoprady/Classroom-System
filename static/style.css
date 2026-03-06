@@ -1,5 +1,5 @@
 /* ============================
-   ALL @imports — load fonts first
+   ALL @imports MUST be at top
 ==============================*/
 @import url('https://fonts.googleapis.com/css?family=Exo:400,700');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
@@ -815,4 +815,43 @@ body.dashboard-page::before {
     color: var(--dash-accent);
     border: 1px solid rgba(59,130,246,0.25);
     margin-left: 6px;
+}
+
+/* ---- File upload row ---- */
+
+.file-upload-wrap {
+    margin-top: 12px;
+}
+
+.file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px dashed rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: var(--dash-muted);
+    font-size: 0.82rem;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-label:hover {
+    border-color: var(--dash-accent);
+    color: var(--dash-accent);
+    background: var(--dash-glow);
+}
+
+.file-label i { font-size: 16px; }
+
+/* Hide the default file input */
+#file-input { display: none; }
+
+/* ---- Counters wrapper ---- */
+
+.counters {
+    display: flex;
+    gap: 6px;
+    align-items: center;
 }

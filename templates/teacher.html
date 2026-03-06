@@ -5,7 +5,6 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     </head>
-<<<<<<< HEAD
     <body class="dashboard-page">
 
         <!-- Top navbar -->
@@ -28,14 +27,22 @@
                     <i class='bx bx-broadcast'></i>
                     <h2>Broadcast Message</h2>
                 </div>
-                <form method="POST" action="/broadcast" class="broadcast-form">
+                <form method="POST" action="/broadcast" enctype="multipart/form-data" class="broadcast-form">
                     <div class="broadcast-input-wrap">
                         <input type="text" name="message"
                                placeholder="Type a message to all students..."
-                               required autocomplete="off">
+                               autocomplete="off">
                         <button type="submit">
                             <i class='bx bx-send'></i> Send
                         </button>
+                    </div>
+                    <!-- File upload row -->
+                    <div class="file-upload-wrap">
+                        <label class="file-label" for="file-input">
+                            <i class='bx bx-paperclip'></i>
+                            <span id="file-name-display">Attach a file (optional)</span>
+                        </label>
+                        <input type="file" name="file" id="file-input">
                     </div>
                 </form>
             </section>
@@ -45,7 +52,11 @@
                 <div class="dash-card-header">
                     <i class='bx bx-group'></i>
                     <h2>Students</h2>
-                    <span class="student-count" id="count-active">0 active</span><span class="student-count count-inactive" id="count-inactive">0 inactive</span><span class="student-count count-total" id="count-total">0 total</span>
+                    <div class="counters">
+                        <span class="student-count" id="count-active">0 active</span>
+                        <span class="student-count count-inactive" id="count-inactive">0 inactive</span>
+                        <span class="student-count count-total" id="count-total">0 total</span>
+                    </div>
                 </div>
                 <div class="table-wrap">
                     <table class="student-table">
@@ -89,41 +100,27 @@
                 </svg>
             </div>
         </template>
-=======
-    <body>
-        <h1>Teacher Dashboard</h1>
-        
-        <h2>Broadcast Message</h2>
-        <form method="POST" action="/broadcast" enctype="multipart/form-data">
-            <input type="text" name="message" 
-            placeholder="Text message">
-
-            <br><br>
-
-            <input type="file" name="file">
-
-            <br><br>
-            
-            <button type = "submit">Send</button>
-        </form>
-        
-        <hr>
->>>>>>> a0cd0b4c50b4e4fb5dd1f0742b193623d1e8cb2a
 
         <script>
+            // Show selected file name in the label
+            document.getElementById("file-input").addEventListener("change", function() {
+                const display = document.getElementById("file-name-display");
+                display.textContent = this.files.length > 0 ? this.files[0].name : "Attach a file (optional)";
+            });
+
             function fetchStudents() {
                 fetch("/teacher-data")
                 .then(response => response.json())
                 .then(data => {
-                    const tbody = document.getElementById("student-list");
-                    const empty = document.getElementById("empty-state");
+                    const tbody        = document.getElementById("student-list");
+                    const empty        = document.getElementById("empty-state");
                     const countActive   = document.getElementById("count-active");
                     const countInactive = document.getElementById("count-inactive");
                     const countTotal    = document.getElementById("count-total");
                     tbody.innerHTML = "";
 
                     if (data.length === 0) {
-                        empty.style.display = "flex";
+                        empty.style.display   = "flex";
                         countActive.textContent   = "0 active";
                         countInactive.textContent = "0 inactive";
                         countTotal.textContent    = "0 total";
@@ -133,18 +130,18 @@
                         const activeCount   = data.filter(s => s.status.toUpperCase() === "ACTIVE").length;
                         const inactiveCount = data.length - activeCount;
 
-                        countActive.textContent   = activeCount + " active";
+                        countActive.textContent   = activeCount   + " active";
                         countInactive.textContent = inactiveCount + " inactive";
-                        countTotal.textContent    = data.length + " total";
+                        countTotal.textContent    = data.length   + " total";
 
                         data.forEach((student, i) => {
                             const tr = document.createElement("tr");
                             tr.style.animationDelay = (i * 0.05) + "s";
                             tr.classList.add("row-animate");
 
-                            const isActive = student.status.toUpperCase() === "ACTIVE";
-                            const tmplId = isActive ? "heartbeat-active" : "heartbeat-inactive";
-                            const tmpl = document.getElementById(tmplId);
+                            const isActive    = student.status.toUpperCase() === "ACTIVE";
+                            const tmplId      = isActive ? "heartbeat-active" : "heartbeat-inactive";
+                            const tmpl        = document.getElementById(tmplId);
                             const heartbeatNode = tmpl.content.cloneNode(true);
 
                             const tdStatus = document.createElement("td");
@@ -161,10 +158,11 @@
                     }
                 });
             }
+
             fetchStudents();
-<<<<<<< HEAD
             setInterval(fetchStudents, 5000);
         </script>
+
         <script src="http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
         <script>
             const socket = io();
@@ -172,29 +170,6 @@
                 fetchStudents();
             });
         </script>
-=======
-            </script>
 
-            <script src = "http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-
-           <script>
-            // const socket = io();
-
-            // socket.on("updaet_students", function() {
-            //     fetchStudents();
-            socket.on("active_students_update", 
-                function(activeStudents) {
-                    allStudents.forEach(student => {
-                        if
-                        (activeStudents.includes(student.id)) {
-                            document.getElementById("status-" + student.id).innerText = "Active";
-                        } else {
-                            document.getElementById("status-" + student.id).innerText = "Inactive";
-                        }
-                    });
-                }
-            );
-            </script>
->>>>>>> a0cd0b4c50b4e4fb5dd1f0742b193623d1e8cb2a
     </body>
 </html>
