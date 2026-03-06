@@ -5,6 +5,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     </head>
+<<<<<<< HEAD
     <body class="dashboard-page">
 
         <!-- Top navbar -->
@@ -88,6 +89,26 @@
                 </svg>
             </div>
         </template>
+=======
+    <body>
+        <h1>Teacher Dashboard</h1>
+        
+        <h2>Broadcast Message</h2>
+        <form method="POST" action="/broadcast" enctype="multipart/form-data">
+            <input type="text" name="message" 
+            placeholder="Text message">
+
+            <br><br>
+
+            <input type="file" name="file">
+
+            <br><br>
+            
+            <button type = "submit">Send</button>
+        </form>
+        
+        <hr>
+>>>>>>> a0cd0b4c50b4e4fb5dd1f0742b193623d1e8cb2a
 
         <script>
             function fetchStudents() {
@@ -141,6 +162,7 @@
                 });
             }
             fetchStudents();
+<<<<<<< HEAD
             setInterval(fetchStudents, 5000);
         </script>
         <script src="http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
@@ -150,5 +172,29 @@
                 fetchStudents();
             });
         </script>
+=======
+            </script>
+
+            <script src = "http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+           <script>
+            // const socket = io();
+
+            // socket.on("updaet_students", function() {
+            //     fetchStudents();
+            socket.on("active_students_update", 
+                function(activeStudents) {
+                    allStudents.forEach(student => {
+                        if
+                        (activeStudents.includes(student.id)) {
+                            document.getElementById("status-" + student.id).innerText = "Active";
+                        } else {
+                            document.getElementById("status-" + student.id).innerText = "Inactive";
+                        }
+                    });
+                }
+            );
+            </script>
+>>>>>>> a0cd0b4c50b4e4fb5dd1f0742b193623d1e8cb2a
     </body>
 </html>

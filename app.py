@@ -1,13 +1,23 @@
+import eventlet
+eventlet.monkey_patch()
+
 import sqlite3
-from flask import Flask, render_template, request, redirect, make_response, session, jsonify
+from flask import Flask, render_template, request, redirect, make_response, session, jsonify, send_from_directory
 import uuid
 from datetime import datetime, timedelta
 import hashlib
 from flask_socketio import SocketIO, emit
+import os
+from werkzeug.utils import secure_filename 
 
 app = Flask(__name__)
 app.secret_key = "my_secret_key"
 socketio = SocketIO(app)
+active_students = {}
+
+UPLOAD_FOLDER = "uploads"
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok = True)
 
 def init_db():
     conn = sqlite3.connect("database.db")
@@ -84,6 +94,8 @@ def join():
 
     student_id = cursor.lastrowid
     session['student_id'] = student_id
+    session["role"] = "student"
+    session["user_id"] = student_id
     conn.close()
 
     response = make_response(render_template("success.html", name = student_name))
@@ -154,8 +166,24 @@ def broadcast():
     if not session.get("teacher_logged_in"): return redirect("/teacher-login")
 
     message = request.form.get("message")
-    if not message:
+    file = request.files.get("file")
+
+    file_url = None
+    if file and file.filename != "":
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(filepath)
+
+        file_url = "/uploads/" + filename
+
+    socketio.emit("broadcast", {
+        "message": message,
+        "file": file_url
+    })
+
+    if not message and not file:
         return redirect("/teacher")
+    
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     conn = sqlite3.connect("database.db")
@@ -171,6 +199,10 @@ def broadcast():
     conn.close()
 
     return redirect("/teacher")
+
+@app.route("/uploads/<filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 @app.route("/student-data")
 def students_data():
@@ -211,9 +243,33 @@ def teacher_login():
 
 @app.route("/teacher-logout")
 def teacher_logout():
-    session.pop("teacher_logged_out", None)
+    session.pop("teacher_logged_in", None)
     return redirect("/teacher-login")
 
+
+@socketio.on('connect')
+def handle_connect():
+    role = session.get("role")
+    user_id = session.get("user_id")
+
+    if role == "student":
+        active_students[user_id] = request.sid
+        print("student connected:", user_id)
+
+        emit("active_students_update", 
+             list(active_students.keys()),
+             broadcast=True)
+
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    for user_id, sid in list(active_students.items()):
+        if sid == request.sid:
+            del active_students[user_id]
+            print("student_disconnected:", user_id)
+            break
+
+        emit("active_students_update", list(active_students.keys()), broadcast=True)
 
 if __name__ == "__main__":
     init_db()
