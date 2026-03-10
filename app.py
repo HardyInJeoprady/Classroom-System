@@ -77,31 +77,43 @@ def join():
 
     if not student_name:
         return redirect("/")
-    
-    student_uuid = str(uuid.uuid4())
-    
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    existing_uuid = request.cookies.get("student_uuid")
 
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
 
-    cursor.execute(
-        "INSERT INTO students (uuid, name, last_active) VALUES (?, ?, ?)", (student_uuid, student_name, current_time)
-    )
-    conn.commit()
+    # If student already exists, don't create another
+    if existing_uuid:
+        cursor.execute("SELECT id, name FROM students WHERE uuid = ?", (existing_uuid,))
+        student = cursor.fetchone()
 
-    socketio.emit("update_students")
+        if student:
+            conn.close()
+            return render_template("success.html", name=student[1])
+
+    student_uuid = str(uuid.uuid4())
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    cursor.execute(
+        "INSERT INTO students (uuid, name, last_active) VALUES (?, ?, ?)",
+        (student_uuid, student_name, current_time)
+    )
+
+    conn.commit()
 
     student_id = cursor.lastrowid
     session['student_id'] = student_id
     session["role"] = "student"
     session["user_id"] = student_id
+
     conn.close()
 
-    response = make_response(render_template("success.html", name = student_name))
+    response = make_response(render_template("success.html", name=student_name))
     response.set_cookie("student_uuid", student_uuid)
 
     return response
+
 @app.route("/ping", methods=["POST"])
 def ping():
     student_uuid = request.cookies.get("student_uuid")
@@ -226,19 +238,26 @@ def teacher_login():
         password = request.form.get("password")
 
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-
+        session["teacher_logged_in"] = True
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
 
         cursor.execute("SELECT * FROM teachers WHERE username = ? AND password = ?", (username, hashed_password))
         teacher = cursor.fetchone()
-        conn.close()
 
         if teacher:
+
+            cursor.execute("DELETE FROM students")
+            cursor.execute("DELETE FROM sqlite_sequence WHERE name = 'students'")
+            conn.commit()
+            active_students.clear()
+
             session["teacher_logged_in"] = True
+            conn.close()
+           
             return redirect("/teacher")
-        else:
-            return "Invalid Credentials"
+        conn.close()
+        return "Invalid Credentials"
     return render_template("teacher_login.html")    
 
 @app.route("/teacher-logout")
@@ -269,7 +288,7 @@ def handle_disconnect():
             print("student_disconnected:", user_id)
             break
 
-        emit("active_students_update", list(active_students.keys()), broadcast=True)
+    emit("active_students_update", list(active_students.keys()), broadcast=True)
 
 if __name__ == "__main__":
     init_db()
