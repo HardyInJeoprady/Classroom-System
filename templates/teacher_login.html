@@ -4,16 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Form in HTML and CSS | Codehal</title>
+    <title>Teacher Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
-
-<!-- login-page class scopes all login CSS — join/success pages are unaffected -->
 <body class="login-page" style="background-image: url(&quot;{{ url_for('static', filename='img.jpg') }}&quot;);">
-
     <div class="particles" id="particles"></div>
-
     <div class="wrapper">
         <div class="logo-area">
             <div class="icon-ring">
@@ -22,7 +18,6 @@
             <h1>Welcome Back</h1>
             <p>Sign in to continue your journey</p>
         </div>
-
         <form action="#" method="POST">
             <div class="input-group">
                 <input type="text" name="username" placeholder="Username" required autocomplete="off">
@@ -40,19 +35,10 @@
             </div>
             <button type="submit" class="btn-login">Sign In</button>
         </form>
-
-        <div class="divider">or continue with</div>
-
-        <div class="social-row">
-            <button class="btn-social"><i class='bx bxl-google'></i> Google</button>
-            <button class="btn-social"><i class='bx bxl-github'></i> GitHub</button>
-        </div>
-
         <p class="register-link">
             Don't have an account? <a href="#">Register now</a>
         </p>
     </div>
-
     <script>
         const container = document.getElementById('particles');
         for (let i = 0; i < 40; i++) {
@@ -65,6 +51,5 @@
             container.appendChild(p);
         }
     </script>
-
 </body>
 </html>

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Teacher Dashboard</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
@@ -40,7 +42,7 @@
                     <div class="file-upload-wrap">
                         <label class="file-label" for="file-input">
                             <i class='bx bx-paperclip'></i>
-                            <span id="file-name-display">Attach a file (optional)</span>
+                            <span id="file-name-display">Attach a file</span>
                         </label>
                         <input type="file" name="file" id="file-input">
                     </div>
@@ -64,7 +66,7 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
-                                <th>Last Active</th>
+                                <th class="col-last-active">Last Active</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -150,7 +152,7 @@
                             tr.innerHTML = `
                                 <td><span class="id-badge">#${student.id}</span></td>
                                 <td><span class="student-name">${student.name}</span></td>
-                                <td><span class="time-label">${student.last_active}</span></td>
+                                <td class="col-last-active"><span class="time-label">${student.last_active}</span></td>
                             `;
                             tr.appendChild(tdStatus);
                             tbody.appendChild(tr);
