@@ -6,4 +6,3 @@ flask-socketio
 
 # WebSocket support with Flask-SocketIO
 eventlet
-# For handling CORS (Cross-Origin Resource Sharing)
