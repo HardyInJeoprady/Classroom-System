@@ -4,4 +4,5 @@ flask
 # Real-time communication (WebSockets)
 flask-socketio
 
+# WebSocket support with Flask-SocketIO
 eventlet
