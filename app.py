@@ -52,6 +52,10 @@ def init_db():
 
 @app.route("/")
 def home():
+    return render_template("index.html")    
+
+@app.route("/join-page")
+def join_page():
     student_uuid = request.cookies.get("student_uuid")
 
     if student_uuid:

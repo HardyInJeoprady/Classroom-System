@@ -94,6 +94,8 @@
         <main class="success-main">
             <div class="screen-share-area" id="screen-share-area">
                 <div class="screen-placeholder">
+                   <div id="preview-area" style="text-align: center; padding: top 80px;"></div>
+                    <div id="waiting"></div> 
                     <div class="screen-icon-wrap">
                         <i class='bx bx-desktop'></i>
                     </div>
@@ -115,7 +117,10 @@
         // ── Broadcast handler ──────────────────────────────────
         socket.on("broadcast", function(data) {
             if (data.message) showToast(data.message);
-            if (data.file)    addFile(data.file);
+            if (data.file){    addFile(data.file);
+                showPreview(data.file);
+            }
+
         });
 
         // ── Show floating toast ────────────────────────────────
@@ -246,6 +251,47 @@
         function pingServer() { fetch("/ping", { method: "POST" }); }
         pingServer();
         setInterval(pingServer, 5000);
+
+        // --- Mid-Screen-preview ---
+        function showPreview(url){
+
+    let preview = document.getElementById("preview-area");
+    let waiting = document.getElementById("waiting");
+
+    if(waiting) waiting.remove();
+
+    let file = url.toLowerCase();
+
+    if(file.endsWith(".png") || file.endsWith(".jpg") || file.endsWith(".jpeg") || file.endsWith(".gif") || file.endsWith(".webp")){
+
+        preview.innerHTML = `
+            <h2>Image from Teacher</h2>
+            <img src="${url}" style="max-width:80%; border-radius:10px;">
+        `;
+
+    }
+
+    else if(file.endsWith(".pdf")){
+
+        preview.innerHTML = `
+            <h2>PDF from Teacher</h2>
+            <iframe src="${url}" width="80%" height="600px"></iframe>
+        `;
+
+    }
+
+    else if(file.endsWith(".mp4") || file.endsWith(".webm") || file.endsWith(".ogg")){
+
+        preview.innerHTML = `
+            <h2>Video from Teacher</h2>
+            <video width="80%" controls>
+                <source src="${url}">
+            </video>
+        `;
+
+    }
+
+}
     </script>
 
 </body>
