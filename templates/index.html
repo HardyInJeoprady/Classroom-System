@@ -1,33 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Classroom System</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassControl</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/boxicons.min.css') }}">
 </head>
+<body class="index-page">
 
-<body>
+    <div class="index-bg"></div>
 
-<div style="text-align:center; margin-top:150px;">
+    <div class="index-particles" id="index-particles"></div>
 
-<h1>Smart Classroom System</h1>
+    <header class="index-header">
+        <div class="index-logo">
+            <i class='bx bxs-graduation'></i>
+            <span>ClassControl</span>
+        </div>
+        <div class="index-header-sub">Smart Classroom System</div>
+    </header>
 
-<br><br>
+    <div class="index-hero">
+        <p class="index-hero-tag">Choose your role to get started</p>
+        <h1 class="index-hero-title">Welcome to <span>ClassControl</span></h1>
+    </div>
 
-<a href="/join-page">
-<button style="padding:15px 40px; font-size:18px;">
-Join as Student
-</button>
-</a>
+    <div class="index-cards-wrap">
 
-<br><br>
+        <div class="idx-container">
+            <div class="idx-flip_box" id="student-flip">
+                <div class="idx-front idx-front-student">
+                    <div class="idx-front-inner">
+                        <div class="idx-front-icon">
+                            <i class='bx bxs-book-open'></i>
+                        </div>
+                        <p class="idx-f-tag">Classroom System</p>
+                        <h2 class="idx-f-title">Join as Student</h2>
+                        <p class="idx-f-hint">Click the arrow to continue</p>
+                    </div>
+                </div>
+                <div class="idx-back idx-back-student">
+                    <div class="idx-back-inner">
+                        <i class='bx bxs-book-open idx-b-icon'></i>
+                        <h2 class="idx-b-title">Student Portal</h2>
+                        <p class="idx-b-text">Enter your name to mark attendance and join the live classroom session with your teacher.</p>
+                        <a href="/join-page" class="idx-b-btn">
+                            <i class='bx bx-log-in-circle'></i>
+                            Join Class
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="idx-r_wrap">
+                <div class="idx-b_round idx-b_round-student"></div>
+                <div class="idx-s_round idx-s_round-student" data-target="student-flip">
+                    <div class="idx-s_arrow"></div>
+                </div>
+            </div>
+        </div>
 
-<a href="/teacher-login">
-<button style="padding:15px 40px; font-size:18px;">
-Teacher Login
-</button>
-</a>
+        <div class="idx-container">
+            <div class="idx-flip_box" id="teacher-flip">
+                <div class="idx-front idx-front-teacher">
+                    <div class="idx-front-inner">
+                        <div class="idx-front-icon idx-front-icon-teacher">
+                            <i class='bx bxs-graduation'></i>
+                        </div>
+                        <p class="idx-f-tag">Classroom System</p>
+                        <h2 class="idx-f-title">Teacher Login</h2>
+                        <p class="idx-f-hint">Click the arrow to continue</p>
+                    </div>
+                </div>
+                <div class="idx-back idx-back-teacher">
+                    <div class="idx-back-inner">
+                        <i class='bx bxs-graduation idx-b-icon'></i>
+                        <h2 class="idx-b-title">Teacher Portal</h2>
+                        <p class="idx-b-text">Sign in to access your dashboard, broadcast messages, and monitor student attendance live.</p>
+                        <a href="/teacher-login" class="idx-b-btn idx-b-btn-teacher">
+                            <i class='bx bx-lock-open-alt'></i>
+                            Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="idx-r_wrap">
+                <div class="idx-b_round idx-b_round-teacher"></div>
+                <div class="idx-s_round idx-s_round-teacher" data-target="teacher-flip">
+                    <div class="idx-s_arrow idx-s_arrow-teacher"></div>
+                </div>
+            </div>
+        </div>
 
-</div>
+    </div>
 
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

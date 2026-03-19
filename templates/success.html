@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Success</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/boxicons.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/atom-one-dark.min.css') }}">
+    <script src="{{ url_for('static', filename='js/highlight.min.js') }}"></script>
 </head>
 <body class="success-page">
 
-    <!-- ── FLOATING MESSAGE TOAST (top-right) ───────────────── -->
     <div class="msg-toast" id="msg-toast">
         <div class="msg-toast-header">
             <i class='bx bxs-user-circle'></i>
@@ -22,7 +23,6 @@
         <div class="msg-toast-bar" id="msg-toast-bar"></div>
     </div>
 
-    <!-- ── MESSAGES PANEL (dropdown) ────────────────────────── -->
     <div class="msg-panel" id="msg-panel">
         <div class="msg-panel-header">
             <i class='bx bx-message-rounded-dots'></i>
@@ -39,7 +39,6 @@
         </div>
     </div>
 
-    <!-- ── TOP BAR ────────────────────────────────────────── -->
     <header class="success-topbar">
         <div class="topbar-left">
             <i class='bx bxs-graduation'></i>
@@ -69,13 +68,10 @@
         </div>
     </header>
 
-    <!-- ── MAIN LAYOUT ───────────────────────────────────── -->
     <div class="success-layout">
 
-        <!-- LEFT SIDEBAR — collapsible, files only -->
         <aside class="success-sidebar" id="success-sidebar">
             <div class="sidebar-section">
-                <!-- Clickable header to toggle -->
                 <div class="sidebar-section-header sidebar-toggle" onclick="toggleSidebar()">
                     <i class='bx bx-folder-open'></i>
                     <span class="sidebar-header-label">Shared Files</span>
@@ -90,12 +86,10 @@
             </div>
         </aside>
 
-        <!-- CENTRE: Screen share / Video -->
         <main class="success-main">
             <div class="screen-share-area" id="screen-share-area">
-                <div class="screen-placeholder">
-                   <div id="preview-area" style="text-align: center; padding: top 80px;"></div>
-                    <div id="waiting"></div> 
+
+                <div class="screen-placeholder" id="screen-placeholder-static">
                     <div class="screen-icon-wrap">
                         <i class='bx bx-desktop'></i>
                     </div>
@@ -103,196 +97,16 @@
                     <p>The teacher's screen share will appear here once they start broadcasting.</p>
                     <div class="screen-pulse-ring"></div>
                 </div>
+
+                <div id="preview-area" style="display:none; text-align:center; width:100%;"></div>
+
             </div>
         </main>
 
     </div>
 
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
-        const socket = io();
-        let msgCount = 0;
-        let toastTimer = null;
-
-        // ── Broadcast handler ──────────────────────────────────
-        socket.on("broadcast", function(data) {
-            if (data.message) showToast(data.message);
-            if (data.file){    addFile(data.file);
-                showPreview(data.file);
-            }
-
-        });
-
-        // ── Show floating toast ────────────────────────────────
-        function showToast(text) {
-            const toast   = document.getElementById("msg-toast");
-            const toastTx = document.getElementById("msg-toast-text");
-            const bar     = document.getElementById("msg-toast-bar");
-
-            toastTx.textContent = text;
-            toast.classList.add("visible");
-
-            // Reset and restart progress bar
-            bar.style.transition = "none";
-            bar.style.width = "100%";
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    bar.style.transition = "width 10s linear";
-                    bar.style.width = "0%";
-                });
-            });
-
-            // Add to panel list
-            addToPanel(text);
-
-            // Auto dismiss after 10s
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(dismissToast, 10000);
-        }
-
-        function dismissToast() {
-            document.getElementById("msg-toast").classList.remove("visible");
-            clearTimeout(toastTimer);
-        }
-
-        // ── Toggle messages panel ──────────────────────────────
-        function togglePanel() {
-            const panel = document.getElementById("msg-panel");
-            panel.classList.toggle("visible");
-        }
-
-        // Close panel when clicking outside
-        document.addEventListener("click", function(e) {
-            const panel  = document.getElementById("msg-panel");
-            const btn    = document.getElementById("msg-toggle-btn");
-            if (panel.classList.contains("visible") &&
-                !panel.contains(e.target) &&
-                !btn.contains(e.target)) {
-                panel.classList.remove("visible");
-            }
-        });
-
-        // ── Add message to panel list ──────────────────────────
-        function addToPanel(text) {
-            const list  = document.getElementById("msg-panel-list");
-            const empty = document.getElementById("panel-empty");
-            const badge = document.getElementById("msg-count-badge");
-
-            if (empty) empty.style.display = "none";
-
-            msgCount++;
-            badge.textContent = msgCount;
-            badge.style.display = "inline-flex";
-
-            const item = document.createElement("div");
-            item.classList.add("msg-item");
-            item.innerHTML = `
-                <div class="msg-meta">
-                    <i class='bx bxs-user-circle'></i>
-                    <span class="msg-author">Teacher</span>
-                    <span class="msg-time">${currentTime()}</span>
-                </div>
-                <p class="msg-text">${text}</p>
-            `;
-            list.appendChild(item);
-            list.scrollTop = list.scrollHeight;
-        }
-
-        // ── Add file to sidebar ────────────────────────────────
-        function addFile(url) {
-            const container = document.getElementById("sidebar-files");
-            const empty = container.querySelector(".sidebar-empty");
-            if (empty) empty.remove();
-
-            const extension = url.split(".").pop().toLowerCase();
-            const isImage = ["png","jpg","jpeg","gif","webp"].includes(extension);
-            const isPDF   = extension === "pdf";
-
-            let icon = "bx-file-blank";
-            if (isImage) icon = "bx-image";
-            else if (isPDF) icon = "bx-file-pdf";
-
-            const filename = url.split("/").pop();
-            const fileItem = document.createElement("div");
-            fileItem.classList.add("file-item");
-            fileItem.innerHTML = `
-                <div class="file-item-icon"><i class='bx ${icon}'></i></div>
-                <div class="file-item-info">
-                    <span class="file-item-name">${filename}</span>
-                    <span class="file-item-type">${extension.toUpperCase()}</span>
-                </div>
-                <a href="${url}" target="_blank" class="file-item-btn" title="Open">
-                    <i class='bx bx-link-external'></i>
-                </a>
-            `;
-
-            if (isImage) {
-                const preview = document.createElement("img");
-                preview.src = url;
-                preview.classList.add("file-preview-img");
-                fileItem.appendChild(preview);
-            }
-
-            container.appendChild(fileItem);
-        }
-
-        // ── Helper: current time string ───────────────────────
-        function currentTime() {
-            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        // ── Toggle sidebar collapse ────────────────────────────
-        function toggleSidebar() {
-            const sidebar  = document.getElementById("success-sidebar");
-            const chevron  = document.getElementById("sidebar-chevron");
-            sidebar.classList.toggle("collapsed");
-            chevron.classList.toggle("rotated");
-        }
-        function pingServer() { fetch("/ping", { method: "POST" }); }
-        pingServer();
-        setInterval(pingServer, 5000);
-
-        // --- Mid-Screen-preview ---
-        function showPreview(url){
-
-    let preview = document.getElementById("preview-area");
-    let waiting = document.getElementById("waiting");
-
-    if(waiting) waiting.remove();
-
-    let file = url.toLowerCase();
-
-    if(file.endsWith(".png") || file.endsWith(".jpg") || file.endsWith(".jpeg") || file.endsWith(".gif") || file.endsWith(".webp")){
-
-        preview.innerHTML = `
-            <h2>Image from Teacher</h2>
-            <img src="${url}" style="max-width:80%; border-radius:10px;">
-        `;
-
-    }
-
-    else if(file.endsWith(".pdf")){
-
-        preview.innerHTML = `
-            <h2>PDF from Teacher</h2>
-            <iframe src="${url}" width="80%" height="600px"></iframe>
-        `;
-
-    }
-
-    else if(file.endsWith(".mp4") || file.endsWith(".webm") || file.endsWith(".ogg")){
-
-        preview.innerHTML = `
-            <h2>Video from Teacher</h2>
-            <video width="80%" controls>
-                <source src="${url}">
-            </video>
-        `;
-
-    }
-
-}
-    </script>
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 </html>

@@ -5,11 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Teacher Dashboard</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-        <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/boxicons.min.css') }}">
     </head>
     <body class="dashboard-page">
 
-        <!-- Top navbar -->
         <nav class="dash-nav">
             <div class="dash-nav-brand">
                 <i class='bx bxs-graduation'></i>
@@ -23,7 +22,6 @@
 
         <div class="dash-container">
 
-            <!-- Broadcast section -->
             <section class="dash-card broadcast-card">
                 <div class="dash-card-header">
                     <i class='bx bx-broadcast'></i>
@@ -38,18 +36,16 @@
                             <i class='bx bx-send'></i> Send
                         </button>
                     </div>
-                    <!-- File upload row -->
                     <div class="file-upload-wrap">
                         <label class="file-label" for="file-input">
                             <i class='bx bx-paperclip'></i>
-                            <span id="file-name-display">Attach a file</span>
+                            <span id="file-name-display">Attach file</span>
                         </label>
-                        <input type="file" name="file" id="file-input">
+                        <input type="file" name="file" id="file-input" multiple>
                     </div>
                 </form>
             </section>
 
-            <!-- Students section -->
             <section class="dash-card students-card">
                 <div class="dash-card-header">
                     <i class='bx bx-group'></i>
@@ -81,7 +77,6 @@
 
         </div>
 
-        <!-- Heartbeat SVG template (active) -->
         <template id="heartbeat-active">
             <div class="heartbeat-wrap active">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5184 3844.17" class="heartbeat-svg">
@@ -91,7 +86,6 @@
             </div>
         </template>
 
-        <!-- Flatline SVG template (inactive) -->
         <template id="heartbeat-inactive">
             <div class="heartbeat-wrap inactive">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5184 3844.17" class="heartbeat-svg">
@@ -103,75 +97,8 @@
             </div>
         </template>
 
-        <script>
-            // Show selected file name in the label
-            document.getElementById("file-input").addEventListener("change", function() {
-                const display = document.getElementById("file-name-display");
-                display.textContent = this.files.length > 0 ? this.files[0].name : "Attach a file (optional)";
-            });
-
-            function fetchStudents() {
-                fetch("/teacher-data")
-                .then(response => response.json())
-                .then(data => {
-                    const tbody        = document.getElementById("student-list");
-                    const empty        = document.getElementById("empty-state");
-                    const countActive   = document.getElementById("count-active");
-                    const countInactive = document.getElementById("count-inactive");
-                    const countTotal    = document.getElementById("count-total");
-                    tbody.innerHTML = "";
-
-                    if (data.length === 0) {
-                        empty.style.display   = "flex";
-                        countActive.textContent   = "0 active";
-                        countInactive.textContent = "0 inactive";
-                        countTotal.textContent    = "0 total";
-                    } else {
-                        empty.style.display = "none";
-
-                        const activeCount   = data.filter(s => s.status.toUpperCase() === "ACTIVE").length;
-                        const inactiveCount = data.length - activeCount;
-
-                        countActive.textContent   = activeCount   + " active";
-                        countInactive.textContent = inactiveCount + " inactive";
-                        countTotal.textContent    = data.length   + " total";
-
-                        data.forEach((student, i) => {
-                            const tr = document.createElement("tr");
-                            tr.style.animationDelay = (i * 0.05) + "s";
-                            tr.classList.add("row-animate");
-
-                            const isActive    = student.status.toUpperCase() === "ACTIVE";
-                            const tmplId      = isActive ? "heartbeat-active" : "heartbeat-inactive";
-                            const tmpl        = document.getElementById(tmplId);
-                            const heartbeatNode = tmpl.content.cloneNode(true);
-
-                            const tdStatus = document.createElement("td");
-                            tdStatus.appendChild(heartbeatNode);
-
-                            tr.innerHTML = `
-                                <td><span class="id-badge">#${student.id}</span></td>
-                                <td><span class="student-name">${student.name}</span></td>
-                                <td class="col-last-active"><span class="time-label">${student.last_active}</span></td>
-                            `;
-                            tr.appendChild(tdStatus);
-                            tbody.appendChild(tr);
-                        });
-                    }
-                });
-            }
-
-            fetchStudents();
-            setInterval(fetchStudents, 5000);
-        </script>
-
-        <script src="http://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-        <script>
-            const socket = io();
-            socket.on("update_students", function() {
-                fetchStudents();
-            });
-        </script>
+        <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
 
     </body>
 </html>
