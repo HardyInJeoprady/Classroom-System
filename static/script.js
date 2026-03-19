@@ -295,7 +295,7 @@ function initSuccessPage() {
     }
 
     window.copyPreviewCode = function(btn) {
-        const code = btn.closest(".preview-code-wrap").querySelector("code").innerText;
+        const code = btn.closest(".preview-card-body").querySelector("code").innerText;
         navigator.clipboard.writeText(code).then(() => {
             btn.innerHTML = "<i class='bx bx-check'></i> Copied!";
             setTimeout(() => { btn.innerHTML = "<i class='bx bx-copy'></i> Copy"; }, 2000);
