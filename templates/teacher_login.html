@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/boxicons.min.css') }}">
 </head>
 <body class="login-page" style="background-image: url(&quot;{{ url_for('static', filename='img.jpg') }}&quot;);">
     <div class="particles" id="particles"></div>
@@ -39,17 +39,6 @@
             Don't have an account? <a href="#">Register now</a>
         </p>
     </div>
-    <script>
-        const container = document.getElementById('particles');
-        for (let i = 0; i < 40; i++) {
-            const p = document.createElement('div');
-            p.classList.add('particle');
-            p.style.left = Math.random() * 100 + 'vw';
-            p.style.width = p.style.height = (Math.random() * 3 + 1) + 'px';
-            p.style.animationDuration = (Math.random() * 15 + 10) + 's';
-            p.style.animationDelay = (Math.random() * 15) + 's';
-            container.appendChild(p);
-        }
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

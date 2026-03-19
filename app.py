@@ -43,9 +43,7 @@ def init_db():
     cursor.execute("SELECT * FROM teachers WHERE username = ?", ("admin",))
     if not cursor.fetchone():
         hashed_password = hashlib.sha256("admin123".encode()).hexdigest()
-
         cursor.execute("INSERT INTO teachers (username, password) VALUES (?, ?)", ("admin", hashed_password))
-        
 
     conn.commit()
     conn.close()
@@ -75,6 +73,7 @@ def join_page():
         conn.close()  
     
     return render_template("join.html")
+
 @app.route("/join", methods=["POST"])
 def join():
     student_name = request.form.get("name")
@@ -87,7 +86,6 @@ def join():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
 
-    # If student already exists, don't create another
     if existing_uuid:
         cursor.execute("SELECT id, name FROM students WHERE uuid = ?", (existing_uuid,))
         student = cursor.fetchone()
@@ -121,7 +119,7 @@ def join():
 @app.route("/ping", methods=["POST"])
 def ping():
     student_uuid = request.cookies.get("student_uuid")
-    print(f"Ping received - UUID: {student_uuid}")  # add this
+    print(f"Ping received - UUID: {student_uuid}")
     if not student_uuid:
         return jsonify({"error": "No UUID"}), 400
 
@@ -175,44 +173,53 @@ def teacher_data():
         })
 
     return jsonify(result)
-    
 
 @app.route("/broadcast", methods=["POST"])
 def broadcast():
     if not session.get("teacher_logged_in"): return redirect("/teacher-login")
 
     message = request.form.get("message")
-    file = request.files.get("file")
 
-    file_url = None
-    if file and file.filename != "":
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        file.save(filepath)
+    files = request.files.getlist("file")
+    file_urls = []
 
-        file_url = "/uploads/" + filename
+    for file in files:
+        if file and file.filename != "":
+            filename = secure_filename(file.filename)
 
-    socketio.emit("broadcast", {
-        "message": message,
-        "file": file_url
-    })
+            base, ext = os.path.splitext(filename)
+            counter = 1
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            while os.path.exists(save_path):
+                filename = f"{base}({counter}){ext}"
+                save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                counter += 1
 
-    if not message and not file:
-        return redirect("/teacher")
-    
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
+            file.save(save_path)
+            file_urls.append("/uploads/" + filename)
 
-    cursor.execute(
-        "INSERT INTO messages (content, timestamp) VALUES (?, ?)", (message, current_time)
-    )
-    conn.commit()
+    if message:
+        socketio.emit("broadcast", {
+            "message": message,
+            "file": None
+        })
 
-    socketio.emit("new_message", {"message": message})
+    for file_url in file_urls:
+        socketio.emit("broadcast", {
+            "message": None,
+            "file": file_url
+        })
 
-    conn.close()
+    if message:
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO messages (content, timestamp) VALUES (?, ?)", (message, current_time)
+        )
+        conn.commit()
+        socketio.emit("new_message", {"message": message})
+        conn.close()
 
     return redirect("/teacher")
 
@@ -233,9 +240,8 @@ def students_data():
         return jsonify({"message": message[0]})
     else:
         return jsonify({"message": ""})
-    
-    
-@app.route("/teacher-login", methods =["GET", "POST"])
+
+@app.route("/teacher-login", methods=["GET", "POST"])
 def teacher_login():
     if request.method == "POST":
         username = request.form.get("username")
@@ -250,7 +256,6 @@ def teacher_login():
         teacher = cursor.fetchone()
 
         if teacher:
-
             cursor.execute("DELETE FROM students")
             cursor.execute("DELETE FROM sqlite_sequence WHERE name = 'students'")
             conn.commit()

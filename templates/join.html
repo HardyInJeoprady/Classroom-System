@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Join Class</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/boxicons.min.css') }}">
 </head>
 <body>
 <div class="background">
@@ -14,11 +15,17 @@
         <li></li><li></li><li></li><li></li><li></li>
     </ul>
 </div>
-<div class="card">
-    <h1>Join Classroom</h1>
+<div class="card join-card">
+    <div class="join-icon-ring">
+        <i class="join-icon">🎓</i>
+    </div>
+    <h1 class="join-title">Join Classroom</h1>
+    <p class="join-sub">Enter your name to mark attendance</p>
     <form action="/join" method="POST">
-        <label>Enter Your Name:</label>
-        <input type="text" name="name" required>
+        <div class="join-input-group">
+            <i class='bx bx-user'></i>
+            <input type="text" name="name" placeholder="Your full name" required autocomplete="off">
+        </div>
         <button type="submit" class="btn cta">Join</button>
     </form>
 </div>
